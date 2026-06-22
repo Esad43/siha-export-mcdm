@@ -287,18 +287,19 @@ with tab_calc:
         "Le classement se recalcule automatiquement."
     )
 
+    # slider_ver değişince Streamlit slider key'leri değişir →
+    # widget'lar yeni default değerle sıfırdan render edilir
     if "poids" not in st.session_state:
         st.session_state.poids = dict(POIDS_BASE)
+    if "slider_ver" not in st.session_state:
+        st.session_state.slider_ver = 0
 
     st.sidebar.header("⚖️ Poids des critères (%)")
 
-    # --- Bouton de réinitialisation aux ağırlıklar du mémoire ---
-    if st.sidebar.button("🔄 Revenir aux ağırlıklar du mémoire", type="primary", use_container_width=True):
+    # --- Bouton principal : revenir aux poids du mémoire ---
+    if st.sidebar.button("🔄 Revenir aux poids du mémoire", type="primary", use_container_width=True):
         st.session_state.poids = dict(POIDS_BASE)
-        # Effacer les clés de slider pour forcer leur rechargement
-        for code in CODES_CRIT:
-            if f"sl_{code}" in st.session_state:
-                del st.session_state[f"sl_{code}"]
+        st.session_state.slider_ver += 1
         st.rerun()
 
     st.sidebar.divider()
@@ -313,20 +314,20 @@ with tab_calc:
             st.session_state.poids = dict(POIDS_BASE)
         else:
             st.session_state.poids = scenario_poids(preset)
-        for code in CODES_CRIT:
-            if f"sl_{code}" in st.session_state:
-                del st.session_state[f"sl_{code}"]
+        st.session_state.slider_ver += 1
         st.rerun()
 
     st.sidebar.divider()
 
+    # key içinde slider_ver var → reset/senaryo sonrası widget tamamen yenilenir
+    ver = st.session_state.slider_ver
     nouveaux_poids = {}
     for code in CODES_CRIT:
         nouveaux_poids[code] = st.sidebar.slider(
             f"{code} — {LIBELLES[code]}",
             0.0, 40.0,
             float(round(st.session_state.poids[code], 2)),
-            0.1, key=f"sl_{code}",
+            0.1, key=f"sl_{code}_v{ver}",
         )
     st.session_state.poids = nouveaux_poids
     total = sum(nouveaux_poids.values())
