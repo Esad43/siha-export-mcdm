@@ -291,16 +291,31 @@ with tab_calc:
         st.session_state.poids = dict(POIDS_BASE)
 
     st.sidebar.header("⚖️ Poids des critères (%)")
+
+    # --- Bouton de réinitialisation aux ağırlıklar du mémoire ---
+    if st.sidebar.button("🔄 Revenir aux ağırlıklar du mémoire", type="primary", use_container_width=True):
+        st.session_state.poids = dict(POIDS_BASE)
+        # Effacer les clés de slider pour forcer leur rechargement
+        for code in CODES_CRIT:
+            if f"sl_{code}" in st.session_state:
+                del st.session_state[f"sl_{code}"]
+        st.rerun()
+
+    st.sidebar.divider()
+
     preset = st.sidebar.selectbox(
-        "Scénario prédéfini",
+        "Ou appliquer un scénario prédéfini",
         ["Base (Ch. 5)", "S1 — K1 réduit 30%", "S2 — K1 augmenté 30%",
          "S6 — Poids égaux"],
     )
-    if st.sidebar.button("Appliquer le scénario"):
+    if st.sidebar.button("Appliquer le scénario", use_container_width=True):
         if preset == "Base (Ch. 5)":
             st.session_state.poids = dict(POIDS_BASE)
         else:
             st.session_state.poids = scenario_poids(preset)
+        for code in CODES_CRIT:
+            if f"sl_{code}" in st.session_state:
+                del st.session_state[f"sl_{code}"]
         st.rerun()
 
     st.sidebar.divider()
